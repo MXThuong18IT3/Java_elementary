@@ -1,0 +1,54 @@
+package test;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.util.Vector;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+
+public class ViewStudents{
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Vector vData=null, vTitle=null;
+		try {
+			Class.forName("com.mysql.jdbc.driver");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/studentmanagement","root","");
+			Statement stm = conn.createStatement();
+			ResultSet rst = stm.executeQuery("select * from students");
+			ResultSetMetaData rstmeta = rst.getMetaData();
+			int num_column = rstmeta.getColumnCount();
+			
+			vTitle = new Vector(num_column);
+			for(int i=1; i<num_column; i++) {
+				vTitle.add(rstmeta.getColumnLabel(i));
+			}
+			vData = new Vector(10,10);
+			while(rst.next()) {
+				Vector row = new Vector<>(num_column);
+				for(int i=1; i<num_column; i++) {
+					row.add(rst.getString(i));
+					vData.add(row);
+				}
+				rst.close();
+				stm.close();
+				conn.close();
+			}
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+		JScrollPane tableResult = new JScrollPane(new JTable(vData, vTitle));
+		
+		JFrame f = new JFrame();
+		f.setSize(600, 480);
+		f.setContentPane(tableResult);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    f.show();
+	}
+
+}
